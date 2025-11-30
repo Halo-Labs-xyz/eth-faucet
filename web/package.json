@@ -21,6 +21,7 @@
     "@ethersproject/providers": "^5.7.2",
     "animate.css": "^4.1.1",
     "bulma": "^0.9.4",
-    "bulma-toast": "^2.4.4"
+    "bulma-toast": "^2.4.4",
+    "ethers": "^5.7.2"
   }
 }

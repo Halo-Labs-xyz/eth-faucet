@@ -1,5 +1,8 @@
 {
   "scripts": {
     "build": "npm install -g yarn && cd web && yarn install && yarn vite build"
+  },
+  "dependencies": {
+    "ethers": "^6.15.0"
   }
 }

@@ -18,6 +18,7 @@ import (
 type TxBuilder interface {
 	Sender() common.Address
 	Transfer(ctx context.Context, to string, value *big.Int) (common.Hash, error)
+	TransferERC20(ctx context.Context, tokenAddress, to string, amount *big.Int) (common.Hash, error)
 }
 
 type TxBuild struct {

@@ -25,6 +25,8 @@ type infoResponse struct {
 	Network         string `json:"network"`
 	Payout          string `json:"payout"`
 	Symbol          string `json:"symbol"`
+	TokenPayout     string `json:"token_payout"`
+	TokenAddress    string `json:"token_address"`
 	HcaptchaSiteKey string `json:"hcaptcha_sitekey,omitempty"`
 }
 

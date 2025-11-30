@@ -1,0 +1,91 @@
+🚀 Deploying Halo Privacy Faucet
+=================================
+
+📦 Step 1/4: Installing frontend dependencies...
+Installing Node.js dependencies...
+
+added 87 packages, and audited 88 packages in 5m
+
+35 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (4 moderate, 1 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+npm notice
+npm notice New major version of npm available! 10.8.2 -> 11.6.4
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.6.4
+npm notice To update run: npm install -g npm@11.6.4
+npm notice
+
+🔨 Step 2/4: Building frontend...
+
+> eth-faucet@1.2.0 build
+> vite build
+
+vite v5.3.5 building for production...
+transforming...
+9:48:04 AM [vite-plugin-svelte] /home/ubuntu/halo/eth-faucet/web/src/Faucet.svelte:166:8 A11y: A form label must be associated with a control.
+164: 
+165:       <div class="field">
+166:         <label class="label">Your Address</label>
+             ^
+167:         <div class="control">
+168:           <input
+9:48:04 AM [vite-plugin-svelte] /home/ubuntu/halo/eth-faucet/web/src/PrivateStorage.svelte:112:10 A11y: A form label must be associated with a control.
+110: 
+111:         <div class="field">
+112:           <label class="label">Amount to Move Private</label>
+               ^
+113:           <div class="control">
+114:             <input
+9:48:04 AM [vite-plugin-svelte] /home/ubuntu/halo/eth-faucet/web/src/PrivateTransfer.svelte:123:10 A11y: A form label must be associated with a control.
+121: 
+122:         <div class="field">
+123:           <label class="label">Recipient Address</label>
+               ^
+124:           <div class="control">
+125:             <input
+9:48:04 AM [vite-plugin-svelte] /home/ubuntu/halo/eth-faucet/web/src/PrivateTransfer.svelte:136:10 A11y: A form label must be associated with a control.
+134: 
+135:         <div class="field">
+136:           <label class="label">Amount</label>
+               ^
+137:           <div class="control">
+138:             <input
+✓ 211 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.46 kB │ gzip:   0.30 kB
+dist/assets/index-BJafVtD4.css  279.30 kB │ gzip:  32.92 kB
+dist/assets/index-CSDzoEz7.js   315.37 kB │ gzip: 103.13 kB
+✓ built in 968ms
+
+🔨 Step 3/4: Building Go backend...
+
+✅ Build successful!
+
+📋 Configuration:
+   RPC URL: not set
+   Private Key: 
+
+🎯 To run the faucet, use one of these commands:
+
+Option 1 - Using environment variables:
+   export WEB3_PROVIDER='http://64.34.84.209:34141'
+   export PRIVATE_KEY='your_private_key'
+   ./eth-faucet -httpport 8080
+
+Option 2 - Using command line flags:
+   ./eth-faucet -httpport 8080 \
+     -wallet.provider http://64.34.84.209:34141 \
+     -wallet.privkey YOUR_PRIVATE_KEY \
+     -faucet.amount 1 \
+     -faucet.tokenamount 100 \
+     -faucet.tokenaddress 0x2210899f4Dd9944bF1b26836330aefEDD4050508 \
+     -faucet.name 'Halo Privacy Testnet' \
+     -faucet.symbol 'PRIV'
+
