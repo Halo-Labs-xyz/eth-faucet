@@ -18,18 +18,19 @@ import (
 
 var (
 	appVersion = "v1.2.0"
-	chainIDMap = map[string]int{"sepolia": 11155111, "holesky": 17000}
+	chainIDMap = map[string]int{"sepolia": 11155111, "holesky": 17000, "halo": 999999, "halo privacy testnet": 999999}
 
 	httpPortFlag = flag.Int("httpport", 8080, "Listener port to serve HTTP connection")
 	proxyCntFlag = flag.Int("proxycount", 0, "Count of reverse proxies in front of the server")
 	versionFlag  = flag.Bool("version", false, "Print version number")
 
-	payoutFlag       = flag.Float64("faucet.amount", 1, "Number of Ethers to transfer per user request")
-	tokenPayoutFlag  = flag.Float64("faucet.tokenamount", 100, "Number of tokens to transfer per user request")
-	tokenAddressFlag = flag.String("faucet.tokenaddress", os.Getenv("TOKEN_ADDRESS"), "ERC20 token contract address")
-	intervalFlag     = flag.Int("faucet.minutes", 1440, "Number of minutes to wait between funding rounds")
-	netnameFlag      = flag.String("faucet.name", "testnet", "Network name to display on the frontend")
-	symbolFlag       = flag.String("faucet.symbol", "PRIV", "Token symbol to display on the frontend")
+	payoutFlag        = flag.Float64("faucet.amount", 1, "Number of Ethers to transfer per user request")
+	tokenPayoutFlag   = flag.Float64("faucet.tokenamount", 100, "Number of tokens to transfer per user request")
+	tokenAddressFlag  = flag.String("faucet.tokenaddress", os.Getenv("TOKEN_ADDRESS"), "ERC20 token contract address")
+	tokenDecimalsFlag = flag.Uint("faucet.tokendecimals", 0, "Token decimals (0 = auto-detect from contract, default: 18)")
+	intervalFlag      = flag.Int("faucet.minutes", 1440, "Number of minutes to wait between funding rounds")
+	netnameFlag       = flag.String("faucet.name", "testnet", "Network name to display on the frontend")
+	symbolFlag        = flag.String("faucet.symbol", "PRIV", "Token symbol to display on the frontend")
 
 	keyJSONFlag  = flag.String("wallet.keyjson", os.Getenv("KEYSTORE"), "Keystore file to fund user requests with")
 	keyPassFlag  = flag.String("wallet.keypass", "password.txt", "Passphrase text file to decrypt keystore")
@@ -62,7 +63,7 @@ func Execute() {
 	if err != nil {
 		panic(fmt.Errorf("cannot connect to web3 provider: %w", err))
 	}
-	config := server.NewConfig(*netnameFlag, *symbolFlag, *httpPortFlag, *intervalFlag, *proxyCntFlag, *payoutFlag, *tokenPayoutFlag, *tokenAddressFlag, *hcaptchaSiteKeyFlag, *hcaptchaSecretFlag)
+	config := server.NewConfig(*netnameFlag, *symbolFlag, *httpPortFlag, *intervalFlag, *proxyCntFlag, *payoutFlag, *tokenPayoutFlag, *tokenAddressFlag, uint8(*tokenDecimalsFlag), *providerFlag, *hcaptchaSiteKeyFlag, *hcaptchaSecretFlag)
 	go server.NewServer(txBuilder, config).Run()
 
 	c := make(chan os.Signal, 1)

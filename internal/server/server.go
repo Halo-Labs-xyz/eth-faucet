@@ -21,6 +21,25 @@ type Server struct {
 }
 
 func NewServer(builder chain.TxBuilder, cfg *Config) *Server {
+	// Auto-detect token decimals if not explicitly set and token address is provided
+	if cfg.tokenDecimals == 0 && cfg.tokenAddress != "" && cfg.provider != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		decimals, err := chain.GetTokenDecimals(ctx, cfg.provider, cfg.tokenAddress)
+		if err != nil {
+			log.WithError(err).Warn("Failed to fetch token decimals, defaulting to 18")
+			cfg.tokenDecimals = 18
+		} else {
+			cfg.tokenDecimals = decimals
+			log.WithFields(log.Fields{
+				"token":    cfg.tokenAddress,
+				"decimals": decimals,
+			}).Info("Detected token decimals")
+		}
+	} else if cfg.tokenDecimals == 0 {
+		cfg.tokenDecimals = 18 // Default to 18 decimals
+	}
+
 	return &Server{
 		TxBuilder: builder,
 		cfg:       cfg,
@@ -80,7 +99,8 @@ func (s *Server) handleClaim() http.HandlerFunc {
 		// Send ERC20 tokens if configured
 		if s.cfg.tokenAddress != "" && s.cfg.tokenPayout > 0 {
 			time.Sleep(100 * time.Millisecond) // Small delay to avoid nonce issues
-			tokenTxHash, err := s.TransferERC20(ctx, s.cfg.tokenAddress, address, chain.EtherToWei(s.cfg.tokenPayout))
+			tokenAmount := chain.TokenToWei(s.cfg.tokenPayout, s.cfg.tokenDecimals)
+			tokenTxHash, err := s.TransferERC20(ctx, s.cfg.tokenAddress, address, tokenAmount)
 			if err != nil {
 				log.WithError(err).Error("Failed to send token transaction")
 				// Don't fail the entire request if token transfer fails
