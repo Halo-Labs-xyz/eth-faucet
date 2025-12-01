@@ -30,14 +30,23 @@ func (m *MockTxBuilder) Transfer(ctx context.Context, to string, value *big.Int)
 	return args.Get(0).(common.Hash), args.Error(1)
 }
 
+func (m *MockTxBuilder) TransferERC20(ctx context.Context, tokenAddress, to string, amount *big.Int) (common.Hash, error) {
+	args := m.Called(ctx, tokenAddress, to, amount)
+	return args.Get(0).(common.Hash), args.Error(1)
+}
+
 func setupTestServer(mockBuilder chain.TxBuilder) *Server {
 	cfg := &Config{
-		httpPort:   8080,
-		proxyCount: 0,
-		interval:   0,
-		network:    "testnet",
-		symbol:     "ETH",
-		payout:     1.0,
+		httpPort:      8080,
+		proxyCount:     0,
+		interval:      0,
+		network:        "testnet",
+		symbol:         "ETH",
+		payout:        1.0,
+		tokenPayout:   0,
+		tokenAddress:  "",
+		tokenDecimals: 18,
+		provider:      "",
 	}
 	return NewServer(mockBuilder, cfg)
 }

@@ -8,16 +8,62 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum"
 )
 
-// ERC20 ABI for transfer function
-const erc20ABI = `[{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","type":"function"}]`
+// ERC20 ABI for transfer and decimals functions
+const erc20ABI = `[
+	{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","type":"function"},
+	{"constant":true,"inputs":[],"name":"decimals","type":"function","outputs":[{"name":"","type":"uint8"}]}
+]`
 
 type ERC20Transferer interface {
 	TransferERC20(ctx context.Context, tokenAddress, to string, amount *big.Int) (common.Hash, error)
 }
 
-// TransferERC20 sends ERC20 tokens to the specified address
+// GetTokenDecimals fetches the decimals value from an ERC20 token contract
+func GetTokenDecimals(ctx context.Context, provider string, tokenAddress string) (uint8, error) {
+	client, err := ethclient.Dial(provider)
+	if err != nil {
+		return 18, err // Default to 18 if we can't connect
+	}
+	defer client.Close()
+
+	parsedABI, err := abi.JSON(strings.NewReader(erc20ABI))
+	if err != nil {
+		return 18, err
+	}
+
+	tokenAddr := common.HexToAddress(tokenAddress)
+	callData, err := parsedABI.Pack("decimals")
+	if err != nil {
+		return 18, err
+	}
+
+	msg := ethereum.CallMsg{
+		To:   &tokenAddr,
+		Data: callData,
+	}
+	result, err := client.CallContract(ctx, msg, nil)
+	if err != nil {
+		return 18, err // Default to 18 if call fails
+	}
+
+	var decimals uint8
+	err = parsedABI.UnpackIntoInterface(&decimals, "decimals", result)
+	if err != nil {
+		return 18, err
+	}
+
+	return decimals, nil
+}
+
+// TransferERC20 sends ERC20 tokens to the specified address using standard ERC20 transfer().
+// Note: On Halo Network, tokens can support confidential transfers via precompiles,
+// but this function only performs standard public transfers. Users can move tokens to
+// private storage using the frontend interface which calls contract methods that
+// interface with Halo's custom precompiles.
 func (b *TxBuild) TransferERC20(ctx context.Context, tokenAddress, to string, amount *big.Int) (common.Hash, error) {
 	// Parse the ERC20 ABI
 	parsedABI, err := abi.JSON(strings.NewReader(erc20ABI))
