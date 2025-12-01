@@ -1,0 +1,24 @@
+🚀 Starting Halo Privacy Faucet
+=================================
+
+📋 Configuration:
+   RPC URL: http://64.34.84.209:34141
+   Network: Halo Privacy Testnet
+   Token Contract: 0x309208f2f88E3bd1A372E1c557D9Dbc9f664Ed0D
+   Token Symbol: HALO
+   ETH Payout: 1 ETH
+   Token Payout: 100 HALO
+   HTTP Port: 8080
+   Rate Limit: Every 1440 minutes
+
+🌐 Access the faucet at: http://localhost:8080
+
+Starting faucet...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+time="2025-12-01T15:03:42Z" level=info msg="Starting http server 8080"
+[negroni] 2025-12-01T15:03:58Z | 200 | 	 1.236879ms | 64.34.84.209:8080 | GET /
+[negroni] 2025-12-01T15:03:59Z | 200 | 	 76.594µs | 64.34.84.209:8080 | GET /favicon.png
+[negroni] 2025-12-01T15:03:59Z | 200 | 	 704.363999ms | 64.34.84.209:8080 | GET /assets/index-33gWP101.js
+[negroni] 2025-12-01T15:04:01Z | 404 | 	 42.9µs | 64.34.84.209:8080 | GET /sitemap.xml
+[negroni] 2025-12-01T15:04:01Z | 404 | 	 13.735µs | 64.34.84.209:8080 | GET /robots.txt

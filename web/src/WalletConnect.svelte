@@ -8,28 +8,45 @@
     rpcUrl: 'http://64.34.84.209:34141',
     chainId: 999999,
     chainName: 'Halo Privacy Testnet',
-    contractAddress: '0x2210899f4Dd9944bF1b26836330aefEDD4050508',
+    faucetTokenAddress: '0x309208f2f88E3bd1A372E1c557D9Dbc9f664Ed0D',  // HybridPrivacyERC20
+    privacyContractAddress: '0x309208f2f88E3bd1A372E1c557D9Dbc9f664Ed0D',  // Same contract
   };
 
-  const CONTRACT_ABI = [
+  // HybridPrivacyERC20 ABI - supports both public and private transfers
+  const HYBRID_TOKEN_ABI = [
     'function balanceOf(address) view returns (uint256)',
+    'function transfer(address to, uint256 amount) returns (bool)',
+    'function approve(address spender, uint256 amount) returns (bool)',
+    'function allowance(address owner, address spender) view returns (uint256)',
+    'function isPrivateMode(address) view returns (bool)',
     'function getPrivateBalance(address) view returns (bytes)',
-    'function hasPrivateBalance(address) view returns (bool)',
-    'function depositToPrivate(bytes encryptedBalance, uint64 timestamp, bytes signature)',
-    'function privateTransfer(address to, bytes encryptedAmount, bytes signature)',
+    'function depositToPrivate(bytes encryptedBalance, uint64 timestamp, bytes signature) returns (bool)',
+    'function withdrawToPublic(uint256 amount, bytes newEncryptedBalance, uint64 timestamp, bytes signature) returns (bool)',
+    'function privateTransfer(address to, bytes senderNewBalance, uint64 senderTimestamp, bytes senderSignature, bytes recipientNewBalance, uint64 recipientTimestamp, bytes recipientSignature) returns (bool)',
+    'function name() view returns (string)',
+    'function symbol() view returns (string)',
+    'function totalSupply() view returns (uint256)',
   ];
 
   let connected = false;
   let connecting = false;
   let address = '';
+  let walletType = 'none'; // 'metamask', 'para', or 'none'
+  let showWalletOptions = false;
 
-  async function connectWallet() {
+  async function connectMetaMask() {
     if (!window.ethereum) {
-      toast({ message: 'Please install MetaMask!', type: 'is-danger' });
+      toast({ 
+        message: 'MetaMask not installed. Try Para Wallet instead!', 
+        type: 'is-warning' 
+      });
       return;
     }
 
     connecting = true;
+    walletType = 'metamask';
+    showWalletOptions = false;
+    
     try {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
 
@@ -63,31 +80,52 @@
         }
       }
 
-      const contract = new ethers.Contract(
-        CONFIG.contractAddress,
-        CONTRACT_ABI,
-        provider, // Use provider instead of signer for read-only calls initially
+      // HybridPrivacyERC20 - single contract for both public and private functionality
+      const faucetToken = new ethers.Contract(
+        CONFIG.faucetTokenAddress,
+        HYBRID_TOKEN_ABI,
+        signer,
       );
+
+      // For backwards compatibility, contract points to the same faucetToken
+      // (old code used separate contracts for public/private)
+      const contract = faucetToken;
 
       walletStore.set({
         provider,
         signer,
-        contract: contract.connect(signer), // Connect signer for write operations
+        contract,
+        faucetToken,
         address,
         connected: true,
+        walletType: 'metamask',
       });
 
       connected = true;
       toast({
-        message: '✅ Wallet connected successfully!',
+        message: '✅ MetaMask connected successfully!',
         type: 'is-success',
       });
     } catch (error) {
-      console.error('Connection error:', error);
-      toast({ message: 'Failed to connect wallet', type: 'is-danger' });
+      console.error('MetaMask connection error:', error);
+      toast({ message: 'Failed to connect MetaMask', type: 'is-danger' });
+      walletType = 'none';
     } finally {
       connecting = false;
     }
+  }
+
+  function connectPara() {
+    showWalletOptions = false;
+    toast({
+      message: 'Para wallet integration coming soon. Please use MetaMask!',
+      type: 'is-info',
+      duration: 4000
+    });
+  }
+
+  function toggleWalletOptions() {
+    showWalletOptions = !showWalletOptions;
   }
 
   function shortenAddress(addr) {
@@ -115,7 +153,13 @@
           <div>
             <p class="heading is-family-monospace has-text-grey-light">LINK STATUS: ACTIVE</p>
             <p class="title is-6 has-text-primary is-family-monospace">
-              [{shortenAddress(address)}]
+              {#if walletType === 'metamask'}
+                [🦊 {shortenAddress(address)}]
+              {:else if walletType === 'para'}
+                [🔷 {shortenAddress(address)}]
+              {:else}
+                [{shortenAddress(address)}]
+              {/if}
             </p>
           </div>
         {:else}
@@ -128,22 +172,47 @@
     </div>
     <div class="level-right">
       <div class="level-item">
-        <button
-          class="button is-primary is-small"
-          on:click={connectWallet}
-          disabled={connected || connecting}
-          class:is-loading={connecting}
-        >
-          {#if connected}
+        {#if !connected}
+          <div class="dropdown" class:is-active={showWalletOptions}>
+            <div class="dropdown-trigger">
+              <button
+                class="button is-primary is-small"
+                on:click={toggleWalletOptions}
+                disabled={connecting}
+                class:is-loading={connecting}
+              >
+                <span class="icon is-small mr-1">
+                  <i class="fa fa-plug" />
+                </span>
+                <span>INIT_CONNECTION</span>
+                <span class="icon is-small">
+                  <i class="fa fa-angle-down" />
+                </span>
+              </button>
+            </div>
+            <div class="dropdown-menu" role="menu">
+              <div class="dropdown-content">
+                <a class="dropdown-item is-family-monospace" on:click={connectMetaMask}>
+                  <span class="icon">
+                    <i class="fa fa-firefox" />
+                  </span>
+                  <span>METAMASK</span>
+                </a>
+                <a class="dropdown-item is-family-monospace" on:click={connectPara}>
+                  <span class="icon">
+                    <i class="fa fa-wallet" />
+                  </span>
+                  <span>PARA WALLET</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        {:else}
+          <button class="button is-success is-small" disabled>
             <span class="icon is-small mr-1"><i class="fa fa-wifi"></i></span>
             <span>CONNECTED</span>
-          {:else if connecting}
-            <span>INITIALIZING...</span>
-          {:else}
-            <span class="icon is-small mr-1"><i class="fa fa-plug"></i></span>
-            <span>INIT_CONNECTION</span>
-          {/if}
-        </button>
+          </button>
+        {/if}
       </div>
     </div>
   </div>

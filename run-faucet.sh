@@ -6,11 +6,11 @@ echo ""
 
 # Configuration
 RPC_URL="http://64.34.84.209:34141"
-TOKEN_ADDRESS="0x2210899f4Dd9944bF1b26836330aefEDD4050508"
+TOKEN_ADDRESS="0x309208f2f88E3bd1A372E1c557D9Dbc9f664Ed0D"  # HybridPrivacyERC20
 NETWORK_NAME="Halo Privacy Testnet"
-TOKEN_SYMBOL="PRIV"
+TOKEN_SYMBOL="HALO"
 ETH_AMOUNT="1"         # 1 ETH for gas
-TOKEN_AMOUNT="100"     # 100 PRIV tokens
+TOKEN_AMOUNT="100"     # 100 HALO tokens
 HTTP_PORT="8080"
 INTERVAL_MINUTES="1440" # 24 hours
 
@@ -22,17 +22,20 @@ if [ ! -f "./eth-faucet" ]; then
 fi
 
 # Check for private key
-if [ -z "$PRIVATE_KEY" ]; then
-    echo "❌ PRIVATE_KEY environment variable not set"
+if [ -z "$PRIVATE_KEY" ] && [ -z "$FAUCET_PRIVATE_KEY" ]; then
+    echo "❌ PRIVATE_KEY or FAUCET_PRIVATE_KEY environment variable not set"
     echo ""
     echo "Please set your private key:"
-    echo "   export PRIVATE_KEY='your_private_key_here'"
+    echo "   export FAUCET_PRIVATE_KEY='your_private_key_here'"
     echo ""
     echo "Or run with:"
-    echo "   PRIVATE_KEY='your_key' ./run-faucet.sh"
+    echo "   FAUCET_PRIVATE_KEY='your_key' ./run-faucet.sh"
     echo ""
     exit 1
 fi
+
+# Support both PRIVATE_KEY and FAUCET_PRIVATE_KEY
+PRIVATE_KEY="${FAUCET_PRIVATE_KEY:-$PRIVATE_KEY}"
 
 echo "📋 Configuration:"
 echo "   RPC URL: $RPC_URL"

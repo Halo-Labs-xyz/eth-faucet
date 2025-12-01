@@ -32,11 +32,11 @@
     try {
       status = 'Step 1/3: Getting encryption from TEE...';
 
-      const teeResponse = await fetch(`${config.teeUrl}/initialize`, {
+      const teeResponse = await fetch('/api/tee/initialize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          token: config.contractAddress,
+          token: wallet.faucetToken.address,
           user: wallet.address,
           amount: parseFloat(amount).toFixed(1),
         }),
@@ -50,7 +50,8 @@
 
       status = 'Step 2/3: Sending transaction...';
 
-      const tx = await wallet.contract.depositToPrivate(
+      // Use faucetToken (HybridPrivacyERC20) for depositToPrivate
+      const tx = await wallet.faucetToken.depositToPrivate(
         '0x' + teeData.encrypted_balance,
         teeData.timestamp,
         '0x' + teeData.signature,

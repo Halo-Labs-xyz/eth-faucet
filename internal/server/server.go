@@ -35,6 +35,7 @@ func (s *Server) setupRouter() *http.ServeMux {
 	hcaptcha := NewCaptcha(s.cfg.hcaptchaSiteKey, s.cfg.hcaptchaSecret)
 	router.Handle("/api/claim", negroni.New(limiter, hcaptcha, negroni.Wrap(s.handleClaim())))
 	router.Handle("/api/info", s.handleInfo())
+	router.Handle("/api/tee/initialize", s.handleTEEProxy())
 
 	// Static file serving as catch-all
 	router.Handle("/", http.FileServer(web.Dist()))

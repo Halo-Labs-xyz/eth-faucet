@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     svelte(),
     nodePolyfills({
-      include: ['buffer', 'process', 'util', 'stream', 'events'],
+      include: ['buffer', 'process', 'util', 'stream', 'events', 'crypto'],
       globals: {
         Buffer: true,
         global: true,

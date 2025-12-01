@@ -31,31 +31,32 @@
       const ethFormatted = ethers.utils.formatEther(ethBal);
 
       // Get public token balance
-      const publicBal = await wallet.contract.balanceOf(wallet.address);
+      const publicBal = await wallet.faucetToken.balanceOf(wallet.address);
       const publicBalFormatted = ethers.utils.formatEther(publicBal);
 
       // Get private balance
       let privateBalance = null;
+      let isPrivate = false;
       try {
-        const hasPrivate = await wallet.contract.hasPrivateBalance(
-          wallet.address,
-        );
-        if (hasPrivate) {
-          const privateBal = await wallet.contract.getPrivateBalance(
+        // Check if user is in private mode (HybridPrivacyERC20)
+        isPrivate = await wallet.faucetToken.isPrivateMode(wallet.address);
+        if (isPrivate) {
+          const privateBal = await wallet.faucetToken.getPrivateBalance(
             wallet.address,
           );
-          if (privateBal && privateBal !== '0x') {
+          if (privateBal && privateBal !== '0x' && privateBal.length > 0) {
             privateBalance = privateBal;
           }
         }
       } catch (e) {
-        console.log('No private balance set');
+        console.log('No private balance set:', e.message);
       }
 
       balanceStore.set({
         eth: parseFloat(ethFormatted).toFixed(4),
         publicTokens: parseFloat(publicBalFormatted).toFixed(2),
         privateBalance: privateBalance,
+        isPrivateMode: isPrivate,
         loading: false,
       });
 
@@ -102,7 +103,12 @@
         </div>
 
         <div class="balance-item mb-5">
-          <p class="heading is-family-monospace has-text-grey-light mb-1">PRIVATE_BALANCE</p>
+          <p class="heading is-family-monospace has-text-grey-light mb-1">
+            PRIVATE_BALANCE
+            {#if balances?.isPrivateMode}
+              <span class="tag is-success is-small ml-2">ACTIVE</span>
+            {/if}
+          </p>
           <div class="is-family-monospace has-text-primary is-size-7 text-truncate">
             {formatPrivateBalance(balances?.privateBalance)}
           </div>
