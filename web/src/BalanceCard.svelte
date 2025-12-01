@@ -75,59 +75,41 @@
   }
 </script>
 
-<div class="card">
-  <header class="card-header has-background-primary">
-    <p class="card-header-title has-text-white">
-      <span class="icon">
-        <i class="fa fa-wallet" />
+<div class="card h-100">
+  <header class="card-header">
+    <p class="card-header-title">
+      <span class="icon mr-2">
+        <i class="fa fa-hdd-o has-text-primary" />
       </span>
-      <span>Balances</span>
+      <span>ASSET_STORAGE</span>
     </p>
   </header>
   <div class="card-content">
     {#if !wallet.connected}
       <div class="notification is-info is-light">
-        <p>Please connect your wallet to view balances</p>
+        <p class="is-size-7">> ERROR: CONNECTION_REQUIRED</p>
       </div>
     {:else}
       <div class="content">
-        <div class="level is-mobile mb-3">
-          <div class="level-left">
-            <div class="level-item">
-              <div>
-                <p class="heading">ETH Balance</p>
-                <p class="title is-5">{balances?.eth || '0'} ETH</p>
-              </div>
-            </div>
-          </div>
+        <div class="balance-item mb-4">
+          <p class="heading is-family-monospace has-text-grey-light mb-1">ETH_BALANCE</p>
+          <p class="title is-4 has-text-white is-family-monospace">{balances?.eth || '0'} <span class="is-size-6 has-text-grey">ETH</span></p>
         </div>
 
-        <div class="level is-mobile mb-3">
-          <div class="level-left">
-            <div class="level-item">
-              <div>
-                <p class="heading">Public Tokens</p>
-                <p class="title is-5">{balances?.publicTokens || '0'}</p>
-              </div>
-            </div>
-          </div>
+        <div class="balance-item mb-4">
+          <p class="heading is-family-monospace has-text-grey-light mb-1">PUBLIC_TOKENS</p>
+          <p class="title is-4 has-text-white is-family-monospace">{balances?.publicTokens || '0'} <span class="is-size-6 has-text-grey">HALO</span></p>
         </div>
 
-        <div class="level is-mobile mb-3">
-          <div class="level-left">
-            <div class="level-item">
-              <div>
-                <p class="heading">Private Balance</p>
-                <p class="title is-6 has-text-grey">
-                  {formatPrivateBalance(balances?.privateBalance)}
-                </p>
-              </div>
-            </div>
+        <div class="balance-item mb-5">
+          <p class="heading is-family-monospace has-text-grey-light mb-1">PRIVATE_BALANCE</p>
+          <div class="is-family-monospace has-text-primary is-size-7 text-truncate">
+            {formatPrivateBalance(balances?.privateBalance)}
           </div>
         </div>
 
         <button
-          class="button is-success is-fullwidth"
+          class="button is-primary is-fullwidth mt-auto"
           on:click={loadBalances}
           disabled={loading}
           class:is-loading={loading}
@@ -135,7 +117,7 @@
           <span class="icon">
             <i class="fa fa-refresh" />
           </span>
-          <span>Refresh Balances</span>
+          <span>SYNC_DATA</span>
         </button>
       </div>
     {/if}
@@ -143,13 +125,36 @@
 </div>
 
 <style>
-  .card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .h-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .card-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 
-  .card-header {
-    border-radius: 12px 12px 0 0;
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mt-auto {
+    margin-top: auto;
+  }
+  
+  .text-truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: rgba(0, 255, 255, 0.05);
+    border: 1px dashed #333;
+    padding: 0.5rem;
+    color: #00d1b2;
   }
 </style>
 

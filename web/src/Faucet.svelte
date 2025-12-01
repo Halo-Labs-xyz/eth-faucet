@@ -27,17 +27,29 @@
   });
 
   onMount(async () => {
-    const res = await fetch('/api/info');
-    faucetInfo = await res.json();
-    mounted = true;
+    try {
+      const res = await fetch('/api/info');
+      if (res.ok) {
+        faucetInfo = await res.json();
+        mounted = true;
+      } else {
+        console.error('Failed to fetch faucet info:', res.statusText);
+        toast({ message: 'Failed to load faucet info', type: 'is-danger' });
+      }
+    } catch (e) {
+      console.error('Error fetching faucet info:', e);
+      toast({ message: 'Error connecting to server', type: 'is-danger' });
+    }
   });
 
+  // @ts-ignore
   window.hcaptchaOnLoad = () => {
     hcaptchaLoaded = true;
   };
 
   let widgetID;
   $: if (mounted && hcaptchaLoaded) {
+    // @ts-ignore
     widgetID = window.hcaptcha.render('hcaptcha', {
       sitekey: faucetInfo.hcaptcha_sitekey,
     });
@@ -59,6 +71,7 @@
           return;
         }
       } catch (error) {
+        // @ts-ignore
         toast({ message: error.reason, type: 'is-warning' });
         return;
       }
@@ -78,6 +91,7 @@
       };
 
       if (hcaptchaLoaded) {
+        // @ts-ignore
         const { response } = await window.hcaptcha.execute(widgetID, {
           async: true,
         });
@@ -93,6 +107,7 @@
       });
 
       let { msg } = await res.json();
+      /** @type {import('bulma-toast').ToastType} */
       let type = res.ok ? 'is-success' : 'is-warning';
       toast({ message: msg, type });
 
@@ -118,92 +133,75 @@
   {/if}
 </svelte:head>
 
-<div class="card">
-  <header class="card-header has-background-info">
-    <p class="card-header-title has-text-white">
-      <span class="icon">
-        <i class="fa fa-tint" />
+<div class="card h-100">
+  <header class="card-header">
+    <p class="card-header-title">
+      <span class="icon mr-2">
+        <i class="fa fa-bolt has-text-info" />
       </span>
-      <span>Testnet Faucet</span>
+      <span>FAUCET_PROTOCOL</span>
     </p>
   </header>
   <div class="card-content">
     <div class="content">
-      <div class="notification is-info is-light">
-        <p class="is-size-7">
-          <strong>Network:</strong>
-          {faucetInfo.network}
-          <br />
-          <strong>ETH Payout:</strong>
-          {faucetInfo.payout} ETH (for gas fees)
-          <br />
-          <strong>Token Payout:</strong>
-          {faucetInfo.token_payout || '100'}
-          {faucetInfo.symbol} tokens
-          <br />
-          <strong>Token Contract:</strong>
-          <span style="font-size: 0.75em; font-family: monospace;">
-            {faucetInfo.token_address || 'Not configured'}
-          </span>
-          <br />
-          <strong>Faucet Address:</strong>
-          <span style="font-size: 0.75em; font-family: monospace;">
-            {faucetInfo.account}
-          </span>
-        </p>
-      </div>
-
-      <div class="notification is-warning is-light">
-        <p class="is-size-7">
-          Request testnet ETH (for gas) and {faucetInfo.symbol} tokens (for
-          private transfers). You can request once every 24 hours.
+      <div class="notification is-info is-light mb-4">
+        <p>
+          > NETWORK: {faucetInfo.network}<br>
+          > PAYOUT: {faucetInfo.payout} ETH + {faucetInfo.token_payout || '100'} {faucetInfo.symbol}
         </p>
       </div>
 
       <div id="hcaptcha" data-size="invisible" />
 
       <div class="field">
-        <label class="label">Your Address</label>
-        <div class="control">
+        <label class="label" for="target-address-input">TARGET_ADDRESS</label>
+        <div class="control has-icons-left">
           <input
+            id="target-address-input"
             bind:value={input}
             class="input"
             type="text"
-            placeholder="Enter your address or ENS name"
+            placeholder="0x..."
             disabled={loading}
           />
+          <span class="icon is-small is-left">
+            <i class="fa fa-terminal"></i>
+          </span>
         </div>
-        <p class="help">
+        <p class="help has-text-grey-dark is-family-monospace">
           {#if wallet.connected}
-            Using connected wallet address
+            > SOURCE: WALLET_DETECTED
           {:else}
-            Or connect your wallet to auto-fill
+            > AWAITING_INPUT...
           {/if}
         </p>
       </div>
 
       <button
-        class="button is-info is-fullwidth"
+        class="button is-info is-fullwidth mt-5"
         on:click={handleRequest}
         disabled={loading || !input}
         class:is-loading={loading}
       >
         <span class="icon">
-          <i class="fa fa-money" />
+          <i class="fa fa-download" />
         </span>
-        <span>Request ETH + Tokens</span>
+        <span>EXECUTE_REQUEST</span>
       </button>
     </div>
   </div>
 </div>
 
 <style>
-  .card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .h-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
-
-  .card-header {
-    border-radius: 12px 12px 0 0;
+  
+  .card-content {
+    flex: 1;
   }
+  
+  /* Overrides handled in App.svelte */
 </style>

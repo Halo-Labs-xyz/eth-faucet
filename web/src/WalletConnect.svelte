@@ -66,13 +66,13 @@
       const contract = new ethers.Contract(
         CONFIG.contractAddress,
         CONTRACT_ABI,
-        signer,
+        provider, // Use provider instead of signer for read-only calls initially
       );
 
       walletStore.set({
         provider,
         signer,
-        contract,
+        contract: contract.connect(signer), // Connect signer for write operations
         address,
         connected: true,
       });
@@ -107,23 +107,21 @@
   });
 </script>
 
-<div class="box has-background-white-bis">
+<div class="box">
   <div class="level is-mobile">
     <div class="level-left">
       <div class="level-item">
         {#if connected}
           <div>
-            <p class="heading">Connected Wallet</p>
-            <p class="title is-6">
-              <span class="tag is-success is-medium">
-                {shortenAddress(address)}
-              </span>
+            <p class="heading is-family-monospace has-text-grey-light">LINK STATUS: ACTIVE</p>
+            <p class="title is-6 has-text-primary is-family-monospace">
+              [{shortenAddress(address)}]
             </p>
           </div>
         {:else}
           <div>
-            <p class="heading">Wallet Status</p>
-            <p class="title is-6">Not connected</p>
+            <p class="heading is-family-monospace has-text-grey-light">LINK STATUS: DISCONNECTED</p>
+            <p class="title is-6 has-text-danger is-family-monospace">NO SIGNAL</p>
           </div>
         {/if}
       </div>
@@ -131,17 +129,19 @@
     <div class="level-right">
       <div class="level-item">
         <button
-          class="button is-primary"
+          class="button is-primary is-small"
           on:click={connectWallet}
           disabled={connected || connecting}
           class:is-loading={connecting}
         >
           {#if connected}
-            ✅ Connected
+            <span class="icon is-small mr-1"><i class="fa fa-wifi"></i></span>
+            <span>CONNECTED</span>
           {:else if connecting}
-            Connecting...
+            <span>INITIALIZING...</span>
           {:else}
-            Connect MetaMask
+            <span class="icon is-small mr-1"><i class="fa fa-plug"></i></span>
+            <span>INIT_CONNECTION</span>
           {/if}
         </button>
       </div>
@@ -150,9 +150,6 @@
 </div>
 
 <style>
-  .box {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
+  /* Styles are handled globally in App.svelte */
 </style>
 

@@ -85,52 +85,55 @@
   }
 </script>
 
-<div class="card">
-  <header class="card-header has-background-link">
-    <p class="card-header-title has-text-white">
-      <span class="icon">
-        <i class="fa fa-lock" />
+<div class="card h-100">
+  <header class="card-header">
+    <p class="card-header-title">
+      <span class="icon mr-2">
+        <i class="fa fa-lock has-text-link" />
       </span>
-      <span>Move to Private Storage</span>
+      <span>TEE_ENCRYPTION</span>
     </p>
   </header>
   <div class="card-content">
     {#if !wallet.connected}
       <div class="notification is-info is-light">
-        <p>Please connect your wallet to use private storage</p>
+        <p class="is-size-7">> ERROR: CONNECTION_REQUIRED</p>
       </div>
     {:else}
       <div class="content">
-        <div class="notification is-info is-light">
+        <div class="notification is-info is-light mb-5">
           <p class="is-size-7">
-            Encrypt your tokens using TEE (Trusted Execution Environment) and
-            store them privately on-chain.
+            > INITIATING_PROTOCOL: TEE_ENCRYPT<br>
+            > STATUS: READY_FOR_INPUT
           </p>
         </div>
 
         <div class="field">
-          <label class="label">Amount to Move Private</label>
-          <div class="control">
+          <label class="label">ENCRYPTION_AMOUNT</label>
+          <div class="control has-icons-left">
             <input
               class="input"
               type="number"
-              placeholder="e.g., 100"
+              placeholder="0.00"
               bind:value={amount}
               min="0"
               step="0.01"
               disabled={loading}
             />
+            <span class="icon is-small is-left">
+              <i class="fa fa-database"></i>
+            </span>
           </div>
         </div>
 
         {#if status}
-          <div class="notification is-info is-light">
-            <p class="is-size-7">{status}</p>
+          <div class="notification is-success is-light">
+            <p class="is-size-7 has-text-weight-medium">> {status}</p>
           </div>
         {/if}
 
         <button
-          class="button is-link is-fullwidth"
+          class="button is-link is-fullwidth mt-5"
           on:click={moveToPrivate}
           disabled={loading || !amount}
           class:is-loading={loading}
@@ -138,7 +141,7 @@
           <span class="icon">
             <i class="fa fa-shield" />
           </span>
-          <span>Move to Private Storage</span>
+          <span>INITIATE_SHIELDING</span>
         </button>
       </div>
     {/if}
@@ -146,13 +149,14 @@
 </div>
 
 <style>
-  .card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .h-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
-
-  .card-header {
-    border-radius: 12px 12px 0 0;
+  
+  .card-content {
+    flex: 1;
   }
 </style>
 

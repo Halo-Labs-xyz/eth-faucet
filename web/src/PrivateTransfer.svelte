@@ -96,32 +96,32 @@
   }
 </script>
 
-<div class="card">
-  <header class="card-header has-background-danger">
-    <p class="card-header-title has-text-white">
-      <span class="icon">
-        <i class="fa fa-paper-plane" />
+<div class="card h-100">
+  <header class="card-header">
+    <p class="card-header-title">
+      <span class="icon mr-2">
+        <i class="fa fa-user-secret has-text-danger" />
       </span>
-      <span>Private Transfer</span>
+      <span>PRIVATE_TX</span>
     </p>
   </header>
   <div class="card-content">
     {#if !wallet.connected}
       <div class="notification is-info is-light">
-        <p>Please connect your wallet to send private transfers</p>
+        <p class="is-size-7">> ERROR: CONNECTION_REQUIRED</p>
       </div>
     {:else}
       <div class="content">
-        <div class="notification is-info is-light">
+        <div class="notification is-warning is-light mb-5">
           <p class="is-size-7">
-            Send privately encrypted tokens to another address. The amount is
-            hidden from public view.
+            > WARNING: ZK_MODE_ACTIVE<br>
+            > DESTINATION_ANONYMITY: ENABLED
           </p>
         </div>
 
         <div class="field">
-          <label class="label">Recipient Address</label>
-          <div class="control">
+          <label class="label">TARGET_ID</label>
+          <div class="control has-icons-left">
             <input
               class="input"
               type="text"
@@ -129,40 +129,46 @@
               bind:value={recipient}
               disabled={loading}
             />
+            <span class="icon is-small is-left">
+              <i class="fa fa-id-card"></i>
+            </span>
           </div>
         </div>
 
         <div class="field">
-          <label class="label">Amount</label>
-          <div class="control">
+          <label class="label">TX_VOLUME</label>
+          <div class="control has-icons-left">
             <input
               class="input"
               type="number"
-              placeholder="e.g., 50"
+              placeholder="0.00"
               bind:value={amount}
               min="0"
               step="0.01"
               disabled={loading}
             />
+            <span class="icon is-small is-left">
+              <i class="fa fa-bolt"></i>
+            </span>
           </div>
         </div>
 
         {#if status}
-          <div class="notification is-info is-light">
-            <p class="is-size-7">{status}</p>
+          <div class="notification is-success is-light">
+            <p class="is-size-7 has-text-weight-medium">> {status}</p>
           </div>
         {/if}
 
         <button
-          class="button is-danger is-fullwidth"
+          class="button is-danger is-fullwidth mt-5"
           on:click={sendPrivateTransfer}
           disabled={loading || !recipient || !amount}
           class:is-loading={loading}
         >
           <span class="icon">
-            <i class="fa fa-send" />
+            <i class="fa fa-share-square-o" />
           </span>
-          <span>Send Private Transfer</span>
+          <span>EXECUTE_TRANSFER</span>
         </button>
       </div>
     {/if}
@@ -170,13 +176,14 @@
 </div>
 
 <style>
-  .card {
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .h-100 {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
-
-  .card-header {
-    border-radius: 12px 12px 0 0;
+  
+  .card-content {
+    flex: 1;
   }
 </style>
 
